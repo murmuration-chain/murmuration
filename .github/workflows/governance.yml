@@ -34,8 +34,9 @@ jobs:
             async function members() {
               const { data } = await github.rest.repos.getContent({ owner: context.repo.owner, repo: context.repo.repo, path: 'MEMBERS.md' });
               const text = Buffer.from(data.content, 'base64').toString('utf8');
+              const roster = text.replace(/<!--[\s\S]*?-->/g, '');
               const set = new Set();
-              for (const m of text.matchAll(/\|\s*@([A-Za-z0-9-]+)\s*\|/g)) set.add(m[1].toLowerCase());
+              for (const m of roster.matchAll(/\|\s*@([A-Za-z0-9-]+)\s*\|/g)) set.add(m[1].toLowerCase());
               return set;
             }
 
