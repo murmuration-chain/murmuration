@@ -1,0 +1,17 @@
+{
+  "name": "murmuration-mcp",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "MCP server for the Murmuration ledger: lets any MCP-capable AI read, propose, vote and enact. Reuses ../common signing and ../client; needs the root @noble deps (run `npm install` in the repo root too).",
+  "engines": { "node": ">=22" },
+  "bin": { "murmuration-mcp": "server.mjs" },
+  "scripts": {
+    "start": "node server.mjs",
+    "smoke": "node smoke.mjs"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "1.32.1",
+    "zod": "4.6.5"
+  }
+}

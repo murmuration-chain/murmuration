@@ -1,0 +1,14 @@
+{
+  "_comment": "Genesis governance parameters. Each is changeable by a passed set_param proposal. Types are fixed; values are not.",
+  "chain_id": "murmuration-preview-0",
+  "protocol_version": 0,
+  "charter_version": 0,
+  "voting_window_blocks": 20,
+  "quorum": 0.33,
+  "threshold": 0.6,
+  "min_standing_to_propose": 0,
+  "anchor_interval_blocks": 50,
+  "block_interval_seconds": 5,
+  "max_txs_per_block": 500,
+  "max_tx_bytes": 16384
+}

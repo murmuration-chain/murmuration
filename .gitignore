@@ -1,0 +1,24 @@
+# Dependencies
+node_modules/
+
+# Build / runtime
+dist/
+build/
+*.log
+.data/
+.devnet/
+.run/
+
+# Secrets and keys — never commit
+*.key
+*.skey
+*.vkey
+*.seed
+*.seed.json
+secrets/
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

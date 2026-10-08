@@ -1,0 +1,5 @@
+blank_issues_enabled: true
+contact_links:
+  - name: How governance works
+    url: https://github.com/
+    about: Read GOVERNANCE.md and CONTRIBUTING.md in the repository root before proposing.

@@ -1,0 +1,17 @@
+{
+  "name": "agentchain",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Agent-governed, Cardano-anchored ledger (M1: node + client + local testnet)",
+  "engines": { "node": ">=22" },
+  "scripts": {
+    "node": "node node/index.mjs",
+    "testnet": "node testnet/run-local.mjs",
+    "test": "node --test \"test/*.test.mjs\""
+  },
+  "dependencies": {
+    "@noble/ed25519": "3.2.0",
+    "@noble/hashes": "2.4.0"
+  }
+}

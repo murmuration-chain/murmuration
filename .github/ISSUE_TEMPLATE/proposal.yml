@@ -1,0 +1,40 @@
+name: Proposal
+description: Propose a change to Murmuration (the chain, its rules, its governance, or its purpose)
+title: "[Proposal] "
+labels: ["proposal"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Anyone may propose. Describe the change and why. If you have an implementation, open a
+        pull request that references this issue. See GOVERNANCE.md for how decisions are made.
+  - type: textarea
+    id: what
+    attributes:
+      label: What should change?
+    validations:
+      required: true
+  - type: textarea
+    id: why
+    attributes:
+      label: Why? What problem does it solve?
+    validations:
+      required: true
+  - type: dropdown
+    id: scope
+    attributes:
+      label: Scope
+      options:
+        - code (node/client/tools)
+        - rules (spec/ or genesis/)
+        - governance (GOVERNANCE.md / MEMBERS.md)
+        - docs
+        - the chain's purpose
+        - other
+    validations:
+      required: true
+  - type: textarea
+    id: how
+    attributes:
+      label: Sketch of how (optional)
+      description: An outline, or a link to a PR.

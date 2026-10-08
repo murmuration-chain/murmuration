@@ -1,0 +1,201 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Murmuration</title>
+<meta name="description" content="Join the Murmuration assembly: propose, vote and decide together. No install, no keys to manage by hand.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%234f46e5'/%3E%3Cpath d='M5 21c4-9 8-9 11-3s7 5 11-5' stroke='white' stroke-width='3' fill='none' stroke-linecap='round'/%3E%3C/svg%3E">
+<!-- The browser signs with the SAME common/ code the node runs. @noble is served locally by the node (no CDN, no bundler). -->
+<script type="importmap">
+{ "imports": {
+  "@noble/ed25519": "/vendor/@noble/ed25519/index.js",
+  "@noble/hashes/sha2.js": "/vendor/@noble/hashes/sha2.js",
+  "@noble/hashes/blake2.js": "/vendor/@noble/hashes/blake2.js"
+} }
+</script>
+<style>
+:root {
+  --bg: #f6f7fb; --card: #ffffff; --ink: #1b1d29; --muted: #5d6275; --line: #e3e5ee;
+  --accent: #4f46e5; --accent-ink: #ffffff; --accent-soft: #eceafd;
+  --yes: #15803d; --yes-soft: #dcfce7; --no: #b91c1c; --no-soft: #fee2e2; --abs: #6b7280; --abs-soft: #eceef3;
+  --warn: #92400e; --warn-soft: #fef3c7; --shadow: 0 1px 2px rgba(20,22,40,.06), 0 4px 14px rgba(20,22,40,.05);
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0f1118; --card: #181b26; --ink: #eceef6; --muted: #9aa1b8; --line: #2a2f40;
+    --accent: #8b85ff; --accent-ink: #0f1118; --accent-soft: #25264a;
+    --yes: #4ade80; --yes-soft: #12301f; --no: #f87171; --no-soft: #3a1717; --abs: #9aa1b8; --abs-soft: #252a39;
+    --warn: #fcd34d; --warn-soft: #3a2d0c; --shadow: none;
+  }
+}
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body { margin: 0; background: var(--bg); color: var(--ink); font: 16px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+.wrap { max-width: 860px; margin: 0 auto; padding: 0 16px 64px; }
+header.top { display: flex; align-items: center; gap: 12px; padding: 18px 0 8px; flex-wrap: wrap; }
+.logo { width: 34px; height: 34px; border-radius: 9px; background: var(--accent); display: grid; place-items: center; flex: none; }
+.logo svg { width: 22px; height: 22px; }
+h1 { font-size: 1.35rem; margin: 0; letter-spacing: -.01em; }
+.tag { color: var(--muted); font-size: .9rem; }
+.spacer { flex: 1; }
+.pill { display: inline-flex; align-items: center; gap: 6px; font-size: .8rem; padding: 3px 10px; border-radius: 999px; background: var(--abs-soft); color: var(--muted); white-space: nowrap; }
+.dot { width: 8px; height: 8px; border-radius: 50%; background: var(--abs); }
+.pill.live .dot { background: var(--yes); } .pill.off .dot { background: var(--no); }
+.card { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 18px; margin: 16px 0; box-shadow: var(--shadow); }
+.card h2 { margin: 0 0 4px; font-size: 1.1rem; }
+.card .sub { color: var(--muted); margin: 0 0 14px; font-size: .92rem; }
+.hero { text-align: center; padding: 30px 18px; background: linear-gradient(180deg, var(--accent-soft), var(--card)); }
+.hero h2 { font-size: 1.5rem; }
+.hero p { max-width: 520px; margin: 8px auto 18px; color: var(--muted); }
+button, .btn { font: inherit; cursor: pointer; border-radius: 10px; border: 1px solid var(--line); background: var(--card); color: var(--ink); padding: 9px 14px; min-height: 40px; }
+button:hover { border-color: var(--accent); }
+button:disabled { opacity: .55; cursor: not-allowed; }
+button.primary { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); font-weight: 600; }
+button.big { font-size: 1.1rem; padding: 14px 28px; min-height: 52px; border-radius: 12px; }
+button.link { background: none; border: none; color: var(--accent); padding: 4px 6px; min-height: 0; text-decoration: underline; }
+button.yes { background: var(--yes-soft); color: var(--yes); border-color: transparent; font-weight: 600; }
+button.no { background: var(--no-soft); color: var(--no); border-color: transparent; font-weight: 600; }
+button.abs { background: var(--abs-soft); color: var(--abs); border-color: transparent; font-weight: 600; }
+.row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+.id { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: .85rem; word-break: break-all; }
+label { display: block; font-weight: 600; font-size: .9rem; margin: 12px 0 4px; }
+input, select, textarea { width: 100%; font: inherit; color: var(--ink); background: var(--bg); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; }
+textarea { min-height: 110px; resize: vertical; }
+input:focus, select:focus, textarea:focus, button:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+.hint { color: var(--muted); font-size: .85rem; margin-top: 4px; }
+.notice { background: var(--warn-soft); color: var(--warn); border-radius: 10px; padding: 10px 12px; font-size: .9rem; margin: 12px 0 0; }
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 10px; }
+.param { border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; }
+.param b { display: block; font-size: .85rem; }
+.param .v { font-size: 1.25rem; font-weight: 700; }
+.param .d { color: var(--muted); font-size: .8rem; }
+details > summary { cursor: pointer; font-weight: 600; }
+.charter { white-space: pre-wrap; margin-top: 10px; }
+.prop { border: 1px solid var(--line); border-radius: 12px; padding: 14px; margin: 12px 0; }
+.prop-head { display: flex; gap: 8px; align-items: baseline; flex-wrap: wrap; }
+.prop-head .num { color: var(--muted); font-size: .85rem; }
+.prop h3 { margin: 0; font-size: 1.02rem; }
+.badge { font-size: .75rem; font-weight: 600; padding: 2px 9px; border-radius: 999px; background: var(--abs-soft); color: var(--muted); }
+.badge.open { background: var(--accent-soft); color: var(--accent); }
+.badge.ok { background: var(--yes-soft); color: var(--yes); }
+.badge.bad { background: var(--no-soft); color: var(--no); }
+.badge.wait { background: var(--warn-soft); color: var(--warn); }
+.body { margin: 8px 0; white-space: pre-wrap; word-break: break-word; }
+.bar { display: flex; height: 10px; border-radius: 6px; overflow: hidden; background: var(--abs-soft); margin: 10px 0 6px; }
+.bar i { display: block; } .bar .y { background: var(--yes); } .bar .n { background: var(--no); } .bar .a { background: var(--abs); opacity: .6; }
+.tally { display: flex; gap: 14px; flex-wrap: wrap; font-size: .85rem; color: var(--muted); }
+.meta { font-size: .82rem; color: var(--muted); margin-top: 6px; }
+.actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
+.actions button { flex: 1 1 90px; }
+.empty { color: var(--muted); text-align: center; padding: 14px; }
+.members { display: flex; flex-wrap: wrap; gap: 6px; }
+.member { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: .78rem; padding: 3px 8px; border-radius: 8px; background: var(--abs-soft); }
+.member.me { background: var(--accent-soft); color: var(--accent); font-weight: 700; }
+#toasts { position: fixed; left: 0; right: 0; bottom: 14px; display: flex; flex-direction: column; align-items: center; gap: 8px; pointer-events: none; padding: 0 16px; z-index: 10; }
+.toast { pointer-events: auto; max-width: 560px; width: 100%; padding: 12px 14px; border-radius: 12px; color: #fff; background: #1f2937; box-shadow: 0 6px 24px rgba(0,0,0,.25); font-size: .95rem; }
+.toast.ok { background: #166534; } .toast.err { background: #991b1b; } .toast.info { background: #3730a3; }
+.steps { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; color: var(--muted); font-size: .88rem; margin-top: 4px; }
+.steps span { background: var(--card); border: 1px solid var(--line); border-radius: 999px; padding: 3px 12px; }
+.hidden { display: none !important; }
+footer { color: var(--muted); font-size: .8rem; text-align: center; margin-top: 30px; }
+@media (max-width: 520px) { .card { padding: 14px; } .hero { padding: 22px 14px; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div class="logo"><svg viewBox="0 0 32 32"><path d="M4 21c4-9 8-9 11-3s7 5 12-5" stroke="#fff" stroke-width="3" fill="none" stroke-linecap="round"/></svg></div>
+    <div><h1>Murmuration</h1><div class="tag">An assembly that decides together</div></div>
+    <div class="spacer"></div>
+    <span id="status" class="pill"><span class="dot"></span><span id="status-text">connecting…</span></span>
+  </header>
+
+  <!-- JOIN / YOU -->
+  <section id="join" class="card hero">
+    <h2>Join the assembly</h2>
+    <p>Murmuration is a shared ledger governed by its members. Anyone can join, propose changes and vote. One click gives you a membership key, created and kept right here in your browser.</p>
+    <button id="btn-join" class="primary big">Join the assembly</button>
+    <div class="steps"><span>1. Join</span><span>2. Read the proposals</span><span>3. Vote or propose</span></div>
+    <p style="margin:18px auto 0"><button id="btn-show-import" class="link">I already have a key</button></p>
+    <div id="import-box" class="hidden" style="max-width:520px;margin:10px auto 0;text-align:left">
+      <label for="import-text">Paste your backup (the file contents, or just the 64-character secret key)</label>
+      <textarea id="import-text" spellcheck="false" placeholder='{"seed":"…"}  or  64 hex characters'></textarea>
+      <div class="row" style="margin-top:8px"><button id="btn-import" class="primary">Use this key</button></div>
+    </div>
+  </section>
+
+  <section id="me" class="card hidden">
+    <h2 id="me-title">You are in</h2>
+    <p class="sub" id="me-sub"></p>
+    <div class="id" id="me-id"></div>
+    <div class="row" style="margin-top:12px">
+      <button id="btn-finish" class="primary hidden">Finish joining</button>
+      <button id="btn-copy">Copy backup</button>
+      <button id="btn-download">Download backup file</button>
+      <button id="btn-forget" class="link">Sign out of this browser</button>
+    </div>
+    <div class="notice"><b>Back up your key.</b> It lives only in this browser. If you clear site data or switch device without a backup, your membership is gone for good. Keep the backup private: anyone who has it can act as you.</div>
+  </section>
+
+  <!-- PROPOSALS -->
+  <section class="card">
+    <h2>Proposals</h2>
+    <p class="sub" id="prop-sub">What the assembly is deciding.</p>
+    <div id="proposals"><div class="empty">Loading…</div></div>
+  </section>
+
+  <!-- PROPOSE -->
+  <section class="card" id="propose-card">
+    <h2>Make a proposal</h2>
+    <p class="sub">Suggest a change or ask the assembly a question. Everyone gets the voting window to decide.</p>
+    <div id="propose-locked" class="hidden notice" style="margin-top:0">Join the assembly above to make proposals.</div>
+    <form id="propose-form" autocomplete="off">
+      <label for="kind">What kind of proposal?</label>
+      <select id="kind">
+        <option value="text">Ask a question or share an idea (non-binding)</option>
+        <option value="set_param">Change a setting of the assembly</option>
+        <option value="amend_charter">Rewrite the charter</option>
+      </select>
+      <div id="f-text">
+        <label for="t-title">Title</label><input id="t-title" maxlength="140" placeholder="A short headline">
+        <label for="t-body">Details</label><textarea id="t-body" placeholder="Explain what you are proposing and why."></textarea>
+      </div>
+      <div id="f-param" class="hidden">
+        <label for="p-key">Which setting?</label><select id="p-key"></select>
+        <div class="hint" id="p-desc"></div>
+        <label for="p-val">New value</label><input id="p-val" inputmode="decimal" placeholder="e.g. 30">
+        <div class="hint" id="p-hint"></div>
+      </div>
+      <div id="f-charter" class="hidden">
+        <label for="c-text">The full new charter</label><textarea id="c-text" style="min-height:220px"></textarea>
+        <div class="hint">This replaces the whole charter if the assembly agrees. The current text is filled in for you to edit.</div>
+      </div>
+      <div class="row" style="margin-top:14px"><button id="btn-propose" type="submit" class="primary">Submit proposal</button></div>
+    </form>
+  </section>
+
+  <!-- ASSEMBLY -->
+  <section class="card">
+    <h2>Settings</h2>
+    <p class="sub">The rules the assembly currently runs on. Changing them takes a proposal and a vote.</p>
+    <div id="params" class="grid"></div>
+  </section>
+
+  <section class="card">
+    <h2>Charter <span class="badge" id="charter-ver"></span></h2>
+    <details><summary>Read the charter</summary><div id="charter" class="charter"></div></details>
+  </section>
+
+  <section class="card">
+    <h2>Members <span class="badge" id="member-count"></span></h2>
+    <p class="sub">Each member has one vote. Standing grows when you take part.</p>
+    <div id="members" class="members"></div>
+  </section>
+
+  <footer>Murmuration · every action is signed in your browser and checked by the ledger · <span id="foot-chain"></span></footer>
+</div>
+<div id="toasts" aria-live="polite"></div>
+<script type="module" src="/web/app.js"></script>
+</body>
+</html>

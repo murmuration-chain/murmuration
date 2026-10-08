@@ -1,0 +1,16 @@
+# CODEOWNERS — who GitHub requests review from.
+#
+# This is a template. After the repo is published and a `members` team exists, uncomment and
+# set the org/team so GitHub auto-requests member review, and pair it with branch protection
+# ("require review from Code Owners") on `main`. Leaving every line commented is valid and
+# simply means no auto-request; members still review per GOVERNANCE.md.
+#
+# Everything is owned by the members:
+# *                 @ORG/members
+#
+# The rules and the constitution (higher bar — set 3 required approvals in branch protection):
+# /GOVERNANCE.md     @ORG/members
+# /MEMBERS.md        @ORG/members
+# /spec/             @ORG/members
+# /genesis/          @ORG/members
+# /.github/          @ORG/members
