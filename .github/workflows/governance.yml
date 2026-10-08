@@ -1,8 +1,9 @@
 name: Governance
 
 # Enforces the rule in GOVERNANCE.md as a commit status ("governance") on each PR:
-#   - normal change:            >= 2 member approvals, open >= 24h
-#   - rules / constitution:     >= 3 member approvals, open >= 48h
+#   - with 4+ members:          >= 2 approvals (normal) or 3 (rules), 24h/48h
+#   - with fewer than 4:        simple majority (normal) or all but one (rules)
+#   - all changes:              open >= 24h (normal) or 48h (rules)
 #   - and no member "changes requested"
 # Members are read from MEMBERS.md. Pair this with branch protection on `main`
 # (require the "governance" status to pass) so it actually gates merging.
@@ -42,7 +43,10 @@ jobs:
               // changed files -> required thresholds
               const files = await github.paginate(github.rest.pulls.listFiles, { owner: context.repo.owner, repo: context.repo.repo, pull_number: pr.number });
               const touchesRules = files.some(f => RULES_RE.test(f.filename));
-              const needApprovals = touchesRules ? 3 : 2;
+              const bootstrap = memberSet.size < 4;
+              const needApprovals = bootstrap
+                ? (touchesRules ? Math.max(0, memberSet.size - 1) : Math.ceil(memberSet.size / 2))
+                : (touchesRules ? 3 : 2);
               const needHours = touchesRules ? 48 : 24;
 
               // latest review state per member
@@ -64,7 +68,7 @@ jobs:
               if (approvals < needApprovals) { state = 'failure'; reasons.push(`${approvals}/${needApprovals} member approvals`); }
               if (hoursOpen < needHours) { state = (state === 'failure' ? 'failure' : 'pending'); reasons.push(`open ${hoursOpen.toFixed(1)}h/${needHours}h`); }
 
-              const kind = touchesRules ? 'rules' : 'normal';
+              const kind = `${touchesRules ? 'rules' : 'normal'}${bootstrap ? ', bootstrap' : ''}`;
               const description = state === 'success'
                 ? `passed (${kind}): ${approvals}/${needApprovals} approvals, ${hoursOpen.toFixed(0)}h`
                 : `not yet (${kind}): ` + reasons.join('; ');
